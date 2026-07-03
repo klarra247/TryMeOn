@@ -18,3 +18,6 @@ data/
 .idea/
 .vscode/
 *.tsbuildinfo
+
+# Redis 스냅샷 (로컬 redis-server 실행 시 생성)
+dump.rdb
