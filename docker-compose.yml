@@ -1,0 +1,6 @@
+# Phase 0 로컬 인프라: 작업 큐용 Redis 하나면 충분.
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

@@ -1,0 +1,85 @@
+/* 키오스크 전제: 큰 터치 타깃, 세로 화면, 다크 톤 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Pretendard", -apple-system, "Noto Sans KR", sans-serif;
+  background: #17181c;
+  color: #f2f2f4;
+  min-height: 100vh;
+}
+
+.page { max-width: 720px; margin: 0 auto; padding: 24px 20px 120px; }
+
+header {
+  display: flex; align-items: baseline; gap: 16px;
+  padding-bottom: 20px;
+}
+header h1 { font-size: 28px; }
+header .sub, header .price { color: #9a9aa3; font-size: 16px; margin-left: auto; }
+
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: #22242a; border: 1px solid #33353d; border-radius: 16px;
+  overflow: hidden; cursor: pointer; text-align: left; color: inherit;
+  transition: transform 0.1s;
+}
+.card:active { transform: scale(0.97); }
+.card img { width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; }
+.card-body { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 16px; }
+.card-body span { color: #9a9aa3; font-size: 14px; }
+
+.btn {
+  border: none; border-radius: 14px; padding: 18px 28px;
+  font-size: 18px; font-weight: 600; cursor: pointer;
+}
+.btn.primary { background: #e8654f; color: #fff; }
+.btn.secondary { background: #2c2e35; color: #e6e6ea; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+
+footer {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; gap: 12px; justify-content: center;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, #17181c 40%);
+}
+
+.viewer { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.viewer-stage { display: flex; align-items: center; gap: 8px; width: 100%; }
+.viewer-stage img {
+  flex: 1; min-width: 0; max-height: 62vh; object-fit: contain;
+  border-radius: 16px; background: #22242a;
+}
+.arrow {
+  background: #2c2e35; color: #f2f2f4; border: none; border-radius: 50%;
+  width: 56px; height: 56px; font-size: 20px; cursor: pointer; flex-shrink: 0;
+}
+.arrow:disabled { opacity: 0.25; cursor: default; }
+.viewer-dots { display: flex; gap: 8px; }
+.dot {
+  background: #2c2e35; color: #9a9aa3; border: none; border-radius: 999px;
+  padding: 8px 14px; font-size: 14px; cursor: pointer;
+}
+.dot.active { background: #e8654f; color: #fff; }
+
+.loading { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 80px 0; }
+.spinner {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 4px solid #33353d; border-top-color: #e8654f;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error { color: #ff8a7a; padding: 12px 0; }
+
+.camera {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  padding: 32px 20px; min-height: 100vh; justify-content: center;
+}
+.camera video {
+  width: min(90vw, 480px); border-radius: 16px; background: #000;
+  aspect-ratio: 9/16; object-fit: cover;
+}
+.camera-actions { display: flex; gap: 12px; }
