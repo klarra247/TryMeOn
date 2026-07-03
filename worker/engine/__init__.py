@@ -12,5 +12,8 @@ def load_engine() -> TryOnEngine:
         from .dummy import DummyTryOnEngine
 
         return DummyTryOnEngine()
-    # Phase 1: "catvton" 구현체가 여기에 추가된다. 앱/큐/뷰어는 그대로.
+    if name == "catvton":
+        from .catvton import CatVTONEngine
+
+        return CatVTONEngine()
     raise ValueError(f"알 수 없는 TRYON_ENGINE: {name}")

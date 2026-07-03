@@ -37,7 +37,7 @@ app = FastAPI(title="TryMeOn API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=config.CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -82,6 +82,35 @@ async def create_tryon(
     result = TryOnResult(
         id=job_id, status=JobStatus.QUEUED, mode=mode, product_id=product_id,
         meta={"queue_mode": queue.queue_mode()},
+    )
+    db.save_job(result)
+    queue.enqueue_tryon(job_id)
+    return result
+
+
+@app.post("/api/products/{product_id}/prewarm", response_model=TryOnResult)
+def prewarm_product(product_id: str, force: bool = False) -> TryOnResult:
+    """마네킹 결과 사전 캐싱 (Phase 2 온보딩 훅의 씨앗).
+
+    점주가 옷을 등록하는 순간 호출해 두면 키오스크에선 대기 0초.
+    force=true 면 기존 캐시를 버리고 다시 생성한다 (의류 이미지 교체 시).
+    """
+    product = catalog.get_product(product_id)
+    if product is None:
+        raise HTTPException(404, "product not found")
+
+    if force:
+        import shutil
+
+        from worker import presets
+
+        cache = presets.result_cache_dir(presets.DEFAULT_MODEL_ID, product_id)
+        shutil.rmtree(cache, ignore_errors=True)
+
+    job_id = uuid.uuid4().hex[:12]
+    result = TryOnResult(
+        id=job_id, status=JobStatus.QUEUED, mode=TryOnMode.MANNEQUIN,
+        product_id=product_id, meta={"queue_mode": queue.queue_mode(), "prewarm": True},
     )
     db.save_job(result)
     queue.enqueue_tryon(job_id)

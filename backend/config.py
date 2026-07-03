@@ -13,6 +13,11 @@ JOBS_MEDIA_DIR = MEDIA_DIR / "jobs"       # 잡별 산출물 (person 원본, vie
 DB_PATH = DATA_DIR / "trymeon.sqlite3"
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+
+# 키오스크 프론트 오리진. 원격 GPU pod 토폴로지(Phase 1 Step 4)에서는
+# 맥의 dev 서버가 pod API 를 직접 치므로 여기에 추가하거나 "*" 로 연다.
+CORS_ORIGINS = os.environ.get(
+    "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
 RQ_QUEUE_NAME = "tryon"
 
 # 큐 모드:

@@ -7,18 +7,21 @@
 > ⚠️ CatVTON/IDM-VTON 은 **비상업 라이선스** — 학습·프로토타입 전용.
 > 상세: [docs/LICENSES.md](docs/LICENSES.md)
 
-## 현재 상태: Phase 0 — 토대 + 학습 루프
-
-모델 없이 전 루프가 돈다:
+## 현재 상태: Phase 1 — 이미지 VTON 실작동 (코드 완성, GPU 검증 대기)
 
 ```
-키오스크(React) → POST /api/tryon → 큐(Redis+RQ) → 더미 워커(TryOnEngine)
-                                                        ↓
-      N앵글 뷰어  ←  GET /api/tryon/{id} 폴링  ←  TryOnResult 미디어 번들
+키오스크(React, 맥) ──▶ GPU pod 공개 URL
+                          ├─ FastAPI :8000 (+/media)
+                          ├─ Redis + RQ 워커
+                          └─ TryOnEngine ├─ dummy   (GPU 불필요, 로컬 개발용)
+                                         └─ catvton (SCHP+DensePose 마스크 → CatVTON 추론)
 ```
 
-Phase 1에서 더미 엔진을 CatVTON(클라우드 GPU)으로 갈아끼우면 된다 —
-앱/큐/뷰어는 그대로.
+- 엔진 선택: `TRYON_ENGINE=dummy|catvton` — backend/frontend 코드는 동일.
+- 마네킹 모드: (model, garment) 키 결과 캐싱 + `POST /api/products/{id}/prewarm`
+  으로 등록 시점 사전 생성 → 키오스크 대기 0초.
+- **RunPod 실행 절차: [deploy/runpod/README.md](deploy/runpod/README.md)**
+  (CatVTON 연동 코드는 GPU 환경에서 최종 검증 전)
 
 ## 구조
 

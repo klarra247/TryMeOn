@@ -15,6 +15,8 @@ from PIL import Image, ImageDraw, ImageFilter
 
 from shared.schemas import EngineInput
 
+from .. import presets
+from ..media import resolve_media_path
 from .base import EngineOutput, TryOnEngine
 
 W, H = 600, 800
@@ -43,13 +45,6 @@ def _key_out_background(img: Image.Image, threshold: int = 235) -> Image.Image:
     return img
 
 
-def _resolve_garment_path(url_or_path: str) -> Path:
-    """가먼트 asset URL(/media/...) → 워커 로컬 경로. Phase 0은 파일시스템 공유 전제."""
-    from backend import config
-
-    if url_or_path.startswith("/media/"):
-        return config.MEDIA_DIR / url_or_path.removeprefix("/media/")
-    return Path(url_or_path)
 
 
 class DummyTryOnEngine(TryOnEngine):
@@ -57,16 +52,20 @@ class DummyTryOnEngine(TryOnEngine):
 
     def run(self, inp: EngineInput, out_dir: Path) -> EngineOutput:
         angles = inp.options.get("angles", [-45, 0, 45])
-        garment_path = _resolve_garment_path(inp.garment.front)
+        garment_path = resolve_media_path(inp.garment.front)
         garment = (
             _key_out_background(Image.open(garment_path)) if garment_path.exists() else None
         )
 
-        person_bg = None
-        if inp.person_image_path:
-            p = Path(inp.person_image_path)
-            if p.exists():
-                person_bg = Image.open(p).convert("RGB")
+        # 사람 사진: user 모드 캡처 우선, preset 이면 스톡 모델 사진 (없으면 실루엣)
+        person_src = (
+            Path(inp.person_image_path) if inp.person_image_path
+            else presets.preset_person_image(inp.preset_model_id or "")
+        )
+        person_bg = (
+            Image.open(person_src).convert("RGB")
+            if person_src and person_src.exists() else None
+        )
 
         views: list[tuple[int, Path]] = []
         for i, angle in enumerate(angles):
